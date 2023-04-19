@@ -1,6 +1,28 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:docsmgtfirebase/ui/SplashScreen.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.android) {
+    await Firebase.initializeApp();
+
+    // Some android/ios specific code
+  } else {
+    await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyAim71MHYGbihG6HtSEi5IEwIHp5pgmU78",
+            projectId: "webfirebase-bd29a",
+            databaseURL:
+                'https://webfirebase-bd29a-default-rtdb.firebaseio.com',
+            messagingSenderId: "918374032237",
+            appId: "1:918374032237:web:4437b62e3a0b99c215b064"));
+    // Some web specific code there
+  }
+
   runApp(const MyApp());
 }
 
