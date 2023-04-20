@@ -14,12 +14,11 @@ Future<void> main() async {
   } else {
     await Firebase.initializeApp(
         options: FirebaseOptions(
-            apiKey: "AIzaSyAim71MHYGbihG6HtSEi5IEwIHp5pgmU78",
-            projectId: "webfirebase-bd29a",
-            databaseURL:
-                'https://webfirebase-bd29a-default-rtdb.firebaseio.com',
-            messagingSenderId: "918374032237",
-            appId: "1:918374032237:web:4437b62e3a0b99c215b064"));
+            apiKey: "AIzaSyBVuYSEthE6kdO5eO3o9wdhX4ZwnBi9vn0",
+            projectId: "docsmgtfirebase",
+            databaseURL: 'https://docsmgtfirebase-default-rtdb.firebaseio.com',
+            messagingSenderId: "852582081126",
+            appId: "1:852582081126:web:ffac5a4dd56280523d83a7"));
     // Some web specific code there
   }
 
@@ -44,9 +43,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.purple,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: SplashScreen(),
     );
   }
 }
