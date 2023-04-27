@@ -1,7 +1,7 @@
+import 'package:docsmgtfirebase/ui/SampleEntry.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:docsmgtfirebase/posts/PostScreen.dart';
 import 'package:docsmgtfirebase/ui/auth/SignupScreen.dart';
 import 'package:docsmgtfirebase/widgets/RoundButton.dart';
 
@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
         .then((value) {
       Utils().toastMessage(value.user!.email.toString());
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => PostScreen()));
+          context, MaterialPageRoute(builder: (context) => SampleEntry()));
 
       setState(() {
         loading = false;
@@ -63,8 +63,10 @@ class _LoginScreenState extends State<LoginScreen> {
           return true;
         },
         child: Scaffold(
-            appBar:
-                AppBar(automaticallyImplyLeading: false, title: Text('Login')),
+            appBar: AppBar(
+              automaticallyImplyLeading: true,
+              title: Text('Login'),
+            ),
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(

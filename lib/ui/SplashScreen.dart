@@ -23,6 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-            child: Text('Firebase Tutorials', style: TextStyle(fontSize: 30))));
+            child: Text('Documents Management System v1.0',
+                style: TextStyle(fontSize: 30))));
   }
 }
