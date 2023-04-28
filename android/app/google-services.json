@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "852582081126",
+    "firebase_url": "https://docsmgtfirebase-default-rtdb.firebaseio.com/",
+    "project_id": "docsmgtfirebase",
+    "storage_bucket": "docsmgtfirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:852582081126:android:d36deaa73c68f2523d83a7",
+        "android_client_info": {
+          "package_name": "com.example.docsmgtfirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "852582081126-p635rs7u6sgv9261kcggf7b0nvnkpppf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK-3Yq0IhXPoKNgCyKtsAZHYKdnxq914E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "852582081126-p635rs7u6sgv9261kcggf7b0nvnkpppf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
