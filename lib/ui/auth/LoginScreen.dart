@@ -35,7 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
       Utils().toastMessage(value.user!.email.toString());
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => SampleEntry()));
-
       setState(() {
         loading = false;
       });
@@ -64,7 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         child: Scaffold(
             appBar: AppBar(
-              automaticallyImplyLeading: true,
               title: Text('Login'),
             ),
             body: Padding(

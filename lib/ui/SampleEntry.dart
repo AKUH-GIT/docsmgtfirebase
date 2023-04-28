@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:docsmgtfirebase/ui/Model/ProjectModel.dart';
+import 'package:docsmgtfirebase/ui/ProjectEntry.dart';
+import 'package:docsmgtfirebase/ui/auth/LoginScreen.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -42,13 +44,12 @@ class SampleEntryState extends State<SampleEntry> {
   @override
   void initState() {
     super.initState();
-    _getProjectData();
+    _readData();
   }
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final databaseRef = FirebaseDatabase.instance.ref('SampleEntry');
-
-  void _getProjectData() async {}
+  final databaseRefProject = FirebaseDatabase.instance.ref('ProjectEntry');
 
   void _clearField() {
     _formKey.currentState!.reset();
@@ -150,18 +151,47 @@ class SampleEntryState extends State<SampleEntry> {
   }
 
   saveProjectValue(ProjectModel projmodel) async {
-    controller_projectID.text = projmodel.projectname!;
+    controller_projectID.text = projmodel.projectName!;
+  }
+
+  _gotoCreateProject() async {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ProjectEntry()));
+  }
+
+  _gotologin() async {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => LoginScreen()));
+  }
+
+  Future<List<ProjectModel>> _readData() async {
+    Query needsSnapshot = await FirebaseDatabase.instance
+        .reference()
+        .child("ProjectEntry")
+        .orderByKey();
+
+    print(needsSnapshot);
+    List<ProjectModel> projModel = [];
+
+    Map<dynamic, dynamic> values = needsSnapshot as Map;
+    values.forEach((key, values) {
+      projModel.add(values);
+    });
+
+    return projModel;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Add Sample')),
-        body: Padding(
+      appBar: AppBar(title: Text('Add Sample')),
+      body: Form(
+        key: _formKey,
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               DropdownSearch<ProjectModel>(
@@ -177,6 +207,9 @@ class SampleEntryState extends State<SampleEntry> {
                   saveProjectValue(projmodel!);
                 },
               ),
+              const SizedBox(
+                height: 20,
+              ),
               TextFormField(
                 controller: controller_sampleID,
                 keyboardType: TextInputType.text,
@@ -190,6 +223,9 @@ class SampleEntryState extends State<SampleEntry> {
                   border: OutlineInputBorder(),
                   labelText: 'Participant / Case ID',
                 ),
+              ),
+              const SizedBox(
+                height: 20,
               ),
               TextFormField(
                 readOnly: true,
@@ -205,68 +241,82 @@ class SampleEntryState extends State<SampleEntry> {
                   labelText: 'Sample Image',
                 ),
               ),
-              ElevatedButton(
-                child: Text(
-                  "Pick Image from Gallery",
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
-                ),
-                onPressed: () {
+              const SizedBox(
+                height: 30,
+              ),
+              RoundButton(
+                title: "Pick Image from Gallery",
+                onTap: () {
                   getDocs_Gallery();
                   //_handleURLButtonPress(context, ImageSourceType.gallery);
                 },
               ),
+              const SizedBox(
+                height: 30,
+              ),
               RoundButton(
                 title: "Pick Image from Camera",
                 onTap: () {
-                  getDocs_Gallery();
+                  //getDocs_Gallery();
+                  _readData();
                   //_handleURLButtonPress(context, ImageSourceType.camera);
                 },
               ),
-              SizedBox(
+              const SizedBox(
+                height: 30,
+              ),
+              RoundButton(
+                  title: "Create Project",
+                  onTap: () {
+                    _gotoCreateProject();
+                  }),
+              const SizedBox(
                 height: 30,
               ),
               RoundButton(
                 title: 'Save Data',
-                loading: false,
+                loading: loading,
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-
+                    setState(() {
+                      loading = true;
+                    });
+                    databaseRef
+                        .child(DateTime.now().millisecondsSinceEpoch.toString())
+                        .set({
+                      'projectid': controller_projectID.text.toString(),
+                      'sampleid': controller_sampleID.text.toString(),
+                      'id': DateTime.now().millisecondsSinceEpoch.toString()
+                    }).then((value) {
+                      Utils().toastMessage('Record saved successfully');
+                      setState(() {
+                        loading = false;
+                      });
+                    }).onError((error, stackTrace) {
+                      Utils().toastMessage(error.toString());
+                      setState(() {
+                        loading = false;
+                      });
+                    });
                   }
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               RoundButton(
-                title: 'Add',
-                loading: loading,
+                title: "Logout",
                 onTap: () {
-                  setState(() {
-                    loading = true;
-                  });
-                  databaseRef
-                      .child(DateTime.now().millisecondsSinceEpoch.toString())
-                      .set({
-                    'projectid': controller_projectID.text.toString(),
-                    'sampleid': controller_sampleID.text.toString(),
-                    'id': DateTime.now().millisecondsSinceEpoch.toString()
-                  }).then((value) {
-                    Utils().toastMessage('Post Added');
-                    setState(() {
-                      loading = false;
-                    });
-                  }).onError((error, stackTrace) {
-                    Utils().toastMessage(error.toString());
-                    setState(() {
-                      loading = false;
-                    });
-                  });
+                  _gotologin();
                 },
-              )
+              ),
+              const SizedBox(
+                height: 30,
+              ),
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

@@ -1,37 +1,31 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class ProjectModel {
-  int? id;
-  String? projectname;
+  String? id;
+  String? projectName;
 
-  static final columns = ["id", "projectname"];
+  static final columns = ["id", "projectName"];
 
-  ProjectModel({this.id, this.projectname});
+  ProjectModel({this.id, this.projectName});
 
-  factory ProjectModel.fromJson(Map<String, dynamic> json) {
-    return ProjectModel(
-        id: json['id'] as int, projectname: json['projectname'] as String);
-  }
-
-  static List<ProjectModel>? fromJsonList(List list) {
-    if (list == null) return null;
-    return list.map((item) => ProjectModel.fromJson(item)).toList();
+  ProjectModel.fromSnapshot(DataSnapshot snapshot) {
+    id = snapshot.key;
+    projectName = snapshot.value!.toString();
   }
 
   String projectNameAsString() {
-    return '#${this.id} ${this.projectname}';
+    return '#${this.id} ${this.projectName}';
   }
 
-  String? get setprojectname => projectname;
+  String? get setprojectname => projectName!;
 
-  Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
-    map["id"] = id;
-    map["projectname"] = projectname;
-    return map;
+  toJson() {
+    return {"id": id, "projectName": projectName};
   }
 
   ///this method will prevent the override of toString
   bool? projectFilterByName(String filter) {
-    return this.projectname.toString().contains(filter);
+    return this.projectName.toString().contains(filter);
   }
 
   ///custom comparing function to check if two users are equal
@@ -40,7 +34,7 @@ class ProjectModel {
   }
 
   @override
-  String toString() => projectname!;
+  String toString() => projectName!;
 }
 
 class Character {

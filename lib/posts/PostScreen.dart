@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:docsmgtfirebase/ui/auth/LoginScreen.dart';
 
 import '../utils/Utils.dart';
-import 'AddPosts.dart';
 
 class PostScreen extends StatefulWidget {
   const PostScreen({Key? key}) : super(key: key);
