@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docsmgtfirebase/ui/Model/ProjectModel.dart';
 import 'package:docsmgtfirebase/ui/ProjectEntry.dart';
 import 'package:docsmgtfirebase/ui/auth/LoginScreen.dart';
@@ -11,6 +12,7 @@ import 'package:path/path.dart' as Path;
 import 'dart:convert';
 import '../utils/Utils.dart';
 import '../widgets/RoundButton.dart';
+import 'package:docsmgtfirebase/provider/DBProvider.dart';
 
 class SampleEntry extends StatefulWidget {
   const SampleEntry({Key? key}) : super(key: key);
@@ -44,12 +46,26 @@ class SampleEntryState extends State<SampleEntry> {
   @override
   void initState() {
     super.initState();
-    _readData();
+    getProjects();
   }
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final databaseRef = FirebaseDatabase.instance.ref('SampleEntry');
-  final databaseRefProject = FirebaseDatabase.instance.ref('ProjectEntry');
+  final dbRefSampleEntry = FirebaseDatabase.instance.ref('SampleEntry');
+  final dbRefProjectEntry = FirebaseDatabase.instance.ref('ProjectEntry');
+
+  void getProjects() async {
+    var collection = FirebaseFirestore.instance.collection('ProjectEntry');
+    var querySnapshot = await collection.get();
+    List<ProjectModel>? lst1 = ProjectModel().toJson();
+
+    for (var queryDocumentSnapshot in querySnapshot.docs) {
+      Map<String, dynamic> data = queryDocumentSnapshot.data();
+      var id = data['id'];
+      var projectName = data['projectName'];
+      lst1 = data as List<ProjectModel>;
+    }
+    lst_project = lst1 as List<ProjectModel>;
+  }
 
   void _clearField() {
     _formKey.currentState!.reset();
@@ -164,23 +180,6 @@ class SampleEntryState extends State<SampleEntry> {
         context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
-  Future<List<ProjectModel>> _readData() async {
-    Query needsSnapshot = await FirebaseDatabase.instance
-        .reference()
-        .child("ProjectEntry")
-        .orderByKey();
-
-    print(needsSnapshot);
-    List<ProjectModel> projModel = [];
-
-    Map<dynamic, dynamic> values = needsSnapshot as Map;
-    values.forEach((key, values) {
-      projModel.add(values);
-    });
-
-    return projModel;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -258,7 +257,6 @@ class SampleEntryState extends State<SampleEntry> {
                 title: "Pick Image from Camera",
                 onTap: () {
                   //getDocs_Gallery();
-                  _readData();
                   //_handleURLButtonPress(context, ImageSourceType.camera);
                 },
               ),
@@ -277,28 +275,9 @@ class SampleEntryState extends State<SampleEntry> {
                 title: 'Save Data',
                 loading: loading,
                 onTap: () {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      loading = true;
-                    });
-                    databaseRef
-                        .child(DateTime.now().millisecondsSinceEpoch.toString())
-                        .set({
-                      'projectid': controller_projectID.text.toString(),
-                      'sampleid': controller_sampleID.text.toString(),
-                      'id': DateTime.now().millisecondsSinceEpoch.toString()
-                    }).then((value) {
-                      Utils().toastMessage('Record saved successfully');
-                      setState(() {
-                        loading = false;
-                      });
-                    }).onError((error, stackTrace) {
-                      Utils().toastMessage(error.toString());
-                      setState(() {
-                        loading = false;
-                      });
-                    });
-                  }
+                  setState(() {
+                    loading = true;
+                  });
                 },
               ),
               const SizedBox(

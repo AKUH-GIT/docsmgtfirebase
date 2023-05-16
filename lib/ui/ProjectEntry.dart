@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docsmgtfirebase/ui/Model/ProjectModel.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,10 @@ class ProjectEntry extends StatefulWidget {
 class ProjectEntryState extends State<ProjectEntry> {
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
+  int next_project_Id = 0;
+
+  final CollectionReference<Map<String, dynamic>> projectLst =
+      FirebaseFirestore.instance.collection('projectEntry');
 
   TextEditingController controller_projectName = new TextEditingController();
 
@@ -57,6 +62,27 @@ class ProjectEntryState extends State<ProjectEntry> {
     );
   }
 
+  getProjectID() async {
+    var collection = FirebaseFirestore.instance.collection('ProjectEntry');
+    var querySnapshot = await collection.get();
+    for (var queryDocumentSnapshot in querySnapshot.docs) {
+      Map<String, dynamic> data = queryDocumentSnapshot.data();
+      var id = data['id'];
+      var projectName = data['projectName'];
+    }
+    next_project_Id = querySnapshot.size + 1;
+  }
+
+  Future<int> getProjectID_old() async {
+    AggregateQuerySnapshot query = await projectLst.count().get();
+    debugPrint('The number of products: ${query.count}');
+    return query.count;
+
+    var myRef = FirebaseFirestore.instance.collection('ProjectEntry');
+    var snapshot = await myRef.count().get();
+    //print('collection Sum ${snapshot.count}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,21 +121,15 @@ class ProjectEntryState extends State<ProjectEntry> {
                     setState(() {
                       loading = true;
                     });
-                    databaseRef
-                        .child(DateTime.now().millisecondsSinceEpoch.toString())
-                        .set({
-                      'projectName': controller_projectName.text.toString(),
-                      'id': DateTime.now().millisecondsSinceEpoch.toString()
-                    }).then((value) {
-                      Utils().toastMessage('Project Added');
-                      setState(() {
-                        loading = false;
-                      });
-                    }).onError((error, stackTrace) {
-                      Utils().toastMessage(error.toString());
-                      setState(() {
-                        loading = false;
-                      });
+
+                    getProjectID();
+
+                    final projectModels =
+                        FirebaseFirestore.instance.collection('ProjectEntry');
+
+                    projectModels.add({
+                      'id': next_project_Id.toString(),
+                      'projectName': controller_projectName.text
                     });
                   }
                 },

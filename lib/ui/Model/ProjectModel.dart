@@ -1,4 +1,7 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+typedef RestaurantPressedCallback = void Function(ProjectModel projectModel);
+typedef CloseProjectModelPressedCallback = void Function();
 
 class ProjectModel {
   String? id;
@@ -8,9 +11,15 @@ class ProjectModel {
 
   ProjectModel({this.id, this.projectName});
 
-  ProjectModel.fromSnapshot(DataSnapshot snapshot) {
+  /*ProjectModel.fromSnapshot(DataSnapshot snapshot) {
     id = snapshot.key;
     projectName = snapshot.value!.toString();
+  }*/
+
+  factory ProjectModel.fromSnapshot(DocumentSnapshot snapshot) {
+    final _snapshot = snapshot.data() as Map<String, dynamic>;
+    return ProjectModel(
+        id: snapshot["id"], projectName: _snapshot["projectName"]);
   }
 
   String projectNameAsString() {
