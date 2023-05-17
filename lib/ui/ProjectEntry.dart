@@ -73,6 +73,22 @@ class ProjectEntryState extends State<ProjectEntry> {
     next_project_Id = querySnapshot.size + 1;
   }
 
+  Future<bool> IsProjectExists(String projectName) async {
+    var collection = FirebaseFirestore.instance.collection('ProjectEntry');
+    var querySnapshot = await collection.get();
+    for (var queryDocumentSnapshot in querySnapshot.docs) {
+      Map<String, dynamic> data = queryDocumentSnapshot.data();
+      if (projectName == data['projectName']) {
+        Utils().toastMessage('Project already exists');
+        setState(() {
+          loading = false;
+        });
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<int> getProjectID_old() async {
     AggregateQuerySnapshot query = await projectLst.count().get();
     debugPrint('The number of products: ${query.count}');
@@ -116,21 +132,31 @@ class ProjectEntryState extends State<ProjectEntry> {
               RoundButton(
                 title: 'Save Data',
                 loading: loading,
-                onTap: () {
+                onTap: () async {
                   if (_formKey.currentState!.validate()) {
                     setState(() {
                       loading = true;
                     });
 
-                    getProjectID();
+                    if (!await IsProjectExists(controller_projectName.text)) {
+                      final projectModels =
+                          FirebaseFirestore.instance.collection('ProjectEntry');
 
-                    final projectModels =
-                        FirebaseFirestore.instance.collection('ProjectEntry');
-
-                    projectModels.add({
-                      'id': next_project_Id.toString(),
-                      'projectName': controller_projectName.text
-                    });
+                      projectModels.add({
+                        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+                        'projectName': controller_projectName.text
+                      }).then((value) {
+                        Utils().toastMessage('Project Created');
+                        setState(() {
+                          loading = false;
+                        });
+                      }).onError((error, stackTrace) {
+                        Utils().toastMessage(error.toString());
+                        setState(() {
+                          loading = false;
+                        });
+                      });
+                    }
                   }
                 },
               )

@@ -53,18 +53,19 @@ class SampleEntryState extends State<SampleEntry> {
   final dbRefSampleEntry = FirebaseDatabase.instance.ref('SampleEntry');
   final dbRefProjectEntry = FirebaseDatabase.instance.ref('ProjectEntry');
 
-  void getProjects() async {
+  Future<List<ProjectModel>> getProjects() async {
     var collection = FirebaseFirestore.instance.collection('ProjectEntry');
     var querySnapshot = await collection.get();
-    List<ProjectModel>? lst1 = ProjectModel().toJson();
 
     for (var queryDocumentSnapshot in querySnapshot.docs) {
       Map<String, dynamic> data = queryDocumentSnapshot.data();
-      var id = data['id'];
-      var projectName = data['projectName'];
-      lst1 = data as List<ProjectModel>;
+      ProjectModel prjModel = new ProjectModel();
+      prjModel.id = data['id'];
+      prjModel.projectName = data['projectName'];
+      lst_project.add(prjModel);
     }
-    lst_project = lst1 as List<ProjectModel>;
+
+    return lst_project;
   }
 
   void _clearField() {
