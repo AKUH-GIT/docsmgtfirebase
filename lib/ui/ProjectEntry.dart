@@ -27,7 +27,6 @@ class ProjectEntryState extends State<ProjectEntry> {
   var focusNode = FocusNode();
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final databaseRef = FirebaseDatabase.instance.ref('ProjectEntry');
 
   void _clearField() {
     _formKey.currentState!.reset();
@@ -150,6 +149,7 @@ class ProjectEntryState extends State<ProjectEntry> {
                         setState(() {
                           loading = false;
                         });
+                        _clearField();
                       }).onError((error, stackTrace) {
                         Utils().toastMessage(error.toString());
                         setState(() {

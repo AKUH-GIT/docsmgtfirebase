@@ -50,8 +50,6 @@ class SampleEntryState extends State<SampleEntry> {
   }
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final dbRefSampleEntry = FirebaseDatabase.instance.ref('SampleEntry');
-  final dbRefProjectEntry = FirebaseDatabase.instance.ref('ProjectEntry');
 
   Future<List<ProjectModel>> getProjects() async {
     var collection = FirebaseFirestore.instance.collection('ProjectEntry');
@@ -68,11 +66,13 @@ class SampleEntryState extends State<SampleEntry> {
     return lst_project;
   }
 
-  void _clearField() {
-    _formKey.currentState!.reset();
-    controller_projectID.text = "";
+  _clearField() {
+    //_formKey.currentState!.reset();
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SampleEntry()));
+    /*controller_projectID.text = "";
     controller_sampleID.text = "";
-    controller_imgpath.text = "";
+    controller_imgpath.text = "";*/
   }
 
   showAlertDialog(BuildContext context, String msg) {
@@ -167,6 +167,70 @@ class SampleEntryState extends State<SampleEntry> {
     }
   }
 
+  Future saveFilePermanently() async {
+    try {
+      if (Platform.isAndroid) {
+        final Directory? appDocDir = await getExternalStorageDirectory();
+
+        var arr = appDocDir!.path.split('/');
+
+        Directory? appDocDirFolder = Directory(arr[0] +
+            "/" +
+            arr[1] +
+            "/" +
+            arr[2] +
+            "/" +
+            arr[3] +
+            '/DCIM/docsmgtsys/${controller_projectID.text}/');
+
+        var arr1 = pickedFile!.path!.split('/');
+        var ext = arr1[7].split('.');
+
+        if (await appDocDirFolder.exists()) {
+          //if folder already exists return path
+        } else {
+          //if folder not exists create folder and then return its path
+
+          //final Directory _appDocDirNewFolder = await _appDocDirFolder.create(recursive: true);
+          appDocDirFolder = await appDocDirFolder.create(recursive: true);
+        }
+
+        print(pickedFile_new!.path! +
+            " - " +
+            appDocDirFolder.path +
+            ext![1] +
+            " - " +
+            fileToDisplay!.path);
+
+        File(pickedFile!.path!).copySync(appDocDirFolder.path +
+            controller_projectID.text +
+            "_" +
+            controller_sampleID.text +
+            "." +
+            ext[1]);
+
+        //fileToDisplay!.copySync(appDocDirFolder.path + controller_imgpath.text);
+
+        //final file = await File(pickedFile.path + '/Traders/Report').create(recursive: true);
+        //file.writeAsStringSync("Hello I'm writting a stackoverflow answer into you");
+
+        //newFile.copySync(_appDocDirFolder.path + arr[7]);
+
+        /*String outputFile = await FilePicker.platform.saveFile(
+          dialogTitle: 'Please select an output file:',
+          fileName: controller_imgpath.text,
+        );
+
+        if (outputFile == null) {
+          // User canceled the picker
+        }*/
+      }
+    } catch (e) {
+      showAlertDialog(context, e.toString());
+      print(e.toString());
+    }
+  }
+
   saveProjectValue(ProjectModel projmodel) async {
     controller_projectID.text = projmodel.projectName!;
   }
@@ -230,12 +294,12 @@ class SampleEntryState extends State<SampleEntry> {
               TextFormField(
                 readOnly: true,
                 controller: controller_imgpath,
-                /*validator: (value) {
-                  if (value.isEmpty)
+                validator: (value) {
+                  if (value!.isEmpty)
                     return "Please select image to upload";
                   else
                     return null;
-                },*/
+                },
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Sample Image',
@@ -279,6 +343,30 @@ class SampleEntryState extends State<SampleEntry> {
                   setState(() {
                     loading = true;
                   });
+
+                  var sampleEntry =
+                      FirebaseFirestore.instance.collection("SampleEntry");
+
+                  if (_formKey.currentState!.validate()) {
+                    sampleEntry.add({
+                      "id": DateTime.now().millisecondsSinceEpoch.toString(),
+                      "projectName": controller_projectID.text,
+                      "sampleID": controller_sampleID.text,
+                      "imgPath": controller_imgpath.text
+                    }).then((value) {
+                      Utils().toastMessage('Sample successfully entered');
+                      setState(() {
+                        loading = false;
+                      });
+                      saveFilePermanently();
+                      _clearField();
+                    }).onError((error, stackTrace) {
+                      Utils().toastMessage(error.toString());
+                      setState(() {
+                        loading = false;
+                      });
+                    });
+                  }
                 },
               ),
               const SizedBox(
