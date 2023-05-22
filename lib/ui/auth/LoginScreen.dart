@@ -58,12 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          SystemNavigator.pop();
-          return true;
+          return false;
         },
         child: Scaffold(
             appBar: AppBar(
               title: Text('Login'),
+              backgroundColor: Colors.purple,
             ),
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -124,13 +124,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text("Don't have an account"),
                         TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SignUpScreen()));
-                            },
-                            child: Text('Sign Up'))
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SignUpScreen()));
+                          },
+                          child: Text(
+                            'Sign Up',
+                            style: TextStyle(color: Colors.purple),
+                          ),
+                        ),
                       ],
                     )
                   ]),

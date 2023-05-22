@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docsmgtfirebase/ui/Model/ProjectModel.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:docsmgtfirebase/ui/SampleEntry.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../utils/Utils.dart';
 import '../widgets/RoundButton.dart';
 
@@ -98,69 +99,92 @@ class ProjectEntryState extends State<ProjectEntry> {
     //print('collection Sum ${snapshot.count}');
   }
 
+  _gotoSampleEntry() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SampleEntry()));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Add Project')),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 30,
-              ),
-              TextFormField(
-                controller: controller_projectName,
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value!.isEmpty)
-                    return "Please enter project name";
-                  else
-                    return null;
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Project Name',
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Add Project'),
+          backgroundColor: Colors.purple,
+        ),
+        body: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 30,
                 ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              RoundButton(
-                title: 'Save Data',
-                loading: loading,
-                onTap: () async {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      loading = true;
-                    });
-
-                    if (!await IsProjectExists(controller_projectName.text)) {
-                      final projectModels =
-                          FirebaseFirestore.instance.collection('ProjectEntry');
-
-                      projectModels.add({
-                        'id': DateTime.now().millisecondsSinceEpoch.toString(),
-                        'projectName': controller_projectName.text
-                      }).then((value) {
-                        Utils().toastMessage('Project Created');
-                        setState(() {
-                          loading = false;
-                        });
-                        _clearField();
-                      }).onError((error, stackTrace) {
-                        Utils().toastMessage(error.toString());
-                        setState(() {
-                          loading = false;
-                        });
+                TextFormField(
+                  controller: controller_projectName,
+                  keyboardType: TextInputType.text,
+                  validator: (value) {
+                    if (value!.isEmpty)
+                      return "Please enter project name";
+                    else
+                      return null;
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Project Name',
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: 'Save Data',
+                  loading: loading,
+                  onTap: () async {
+                    if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        loading = true;
                       });
+
+                      if (!await IsProjectExists(controller_projectName.text)) {
+                        final projectModels = FirebaseFirestore.instance
+                            .collection('ProjectEntry');
+
+                        projectModels.add({
+                          'id':
+                              DateTime.now().millisecondsSinceEpoch.toString(),
+                          'projectName': controller_projectName.text
+                        }).then((value) {
+                          Utils().toastMessage('Project Created');
+                          setState(() {
+                            loading = false;
+                          });
+                          _clearField();
+                        }).onError((error, stackTrace) {
+                          Utils().toastMessage(error.toString());
+                          setState(() {
+                            loading = false;
+                          });
+                        });
+                      }
                     }
-                  }
-                },
-              )
-            ],
+                  },
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: 'Sample Entry',
+                  onTap: () {
+                    _gotoSampleEntry();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

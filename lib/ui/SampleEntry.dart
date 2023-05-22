@@ -5,14 +5,14 @@ import 'package:docsmgtfirebase/ui/ProjectEntry.dart';
 import 'package:docsmgtfirebase/ui/auth/LoginScreen.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as Path;
 import 'dart:convert';
 import '../utils/Utils.dart';
 import '../widgets/RoundButton.dart';
-import 'package:docsmgtfirebase/provider/DBProvider.dart';
+import 'package:flutter/foundation.dart'
+    show Uint8List, defaultTargetPlatform, kIsWeb;
 
 class SampleEntry extends StatefulWidget {
   const SampleEntry({Key? key}) : super(key: key);
@@ -105,7 +105,8 @@ class SampleEntryState extends State<SampleEntry> {
 
   Future getDocs_Gallery() async {
     try {
-      if (Platform.isAndroid) {
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android) {
         result = await FilePicker.platform.pickFiles(
             type: FileType.custom,
             allowMultiple: false,
@@ -149,7 +150,7 @@ class SampleEntryState extends State<SampleEntry> {
               arr_dir[2] +
               "/" +
               arr_dir[3] +
-              "/DCIM/" +
+              "/Download/" +
               controller_projectID.text +
               "/" +
               controller_projectID.text +
@@ -160,6 +161,22 @@ class SampleEntryState extends State<SampleEntry> {
         } else {
           // User canceled the picker
         }
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles();
+        String fileName = "";
+
+        if (result != null) {
+          Uint8List? fileBytes = result.files.first.bytes;
+          fileName = result.files.first.name;
+          pickedFile_new = result.files.first;
+
+          //fileToDisplay = File(pickedFile_new!.path.toString());
+
+          //var arr = fileToDisplay!.path.split("/");
+          //var ext = arr[7].split('.');
+        }
+
+        Utils().toastMessage("I m web - ");
       }
     } catch (e) {
       showAlertDialog(context, e.toString());
@@ -169,9 +186,8 @@ class SampleEntryState extends State<SampleEntry> {
 
   Future saveFilePermanently() async {
     try {
-      if (Platform.isAndroid) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
         final Directory? appDocDir = await getExternalStorageDirectory();
-
         var arr = appDocDir!.path.split('/');
 
         Directory? appDocDirFolder = Directory(arr[0] +
@@ -181,7 +197,7 @@ class SampleEntryState extends State<SampleEntry> {
             arr[2] +
             "/" +
             arr[3] +
-            '/DCIM/docsmgtsys/${controller_projectID.text}/');
+            '/Download/docsmgtsys/${controller_projectID.text}/');
 
         var arr1 = pickedFile!.path!.split('/');
         var ext = arr1[7].split('.');
@@ -245,143 +261,154 @@ class SampleEntryState extends State<SampleEntry> {
         context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
+  _saveData() {
+    var sampleEntry = FirebaseFirestore.instance.collection("SampleEntry");
+
+    sampleEntry.add({
+      "id": DateTime.now().millisecondsSinceEpoch.toString(),
+      "projectName": controller_projectID.text,
+      "sampleID": controller_sampleID.text,
+      "imgPath": controller_imgpath.text
+    }).then((value) {
+      Utils().toastMessage('Sample successfully entered');
+      setState(() {
+        loading = false;
+      });
+      saveFilePermanently();
+      _clearField();
+    }).onError((error, stackTrace) {
+      Utils().toastMessage(error.toString());
+      setState(() {
+        loading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Add Sample')),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 30,
-              ),
-              DropdownSearch<ProjectModel>(
-                items: lst_project,
-                mode: Mode.DIALOG,
-                validator: (value) {
-                  if (value == null) {
-                    return "Project name required";
-                  }
-                },
-                showSearchBox: true,
-                onChanged: (ProjectModel? projmodel) {
-                  saveProjectValue(projmodel!);
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                controller: controller_sampleID,
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value!.isEmpty)
-                    return "Participant / Case ID required";
-                  else
-                    return null;
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Participant / Case ID',
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Add Sample'),
+          backgroundColor: Colors.purple,
+        ),
+        body: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 30,
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                readOnly: true,
-                controller: controller_imgpath,
-                validator: (value) {
-                  if (value!.isEmpty)
-                    return "Please select image to upload";
-                  else
-                    return null;
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Sample Image',
+                DropdownSearch<ProjectModel>(
+                  items: lst_project,
+                  mode: Mode.DIALOG,
+                  validator: (value) {
+                    if (value == null) {
+                      return "Project name required";
+                    }
+                  },
+                  showSearchBox: true,
+                  onChanged: (ProjectModel? projmodel) {
+                    saveProjectValue(projmodel!);
+                  },
                 ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              RoundButton(
-                title: "Pick Image from Gallery",
-                onTap: () {
-                  getDocs_Gallery();
-                  //_handleURLButtonPress(context, ImageSourceType.gallery);
-                },
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              RoundButton(
-                title: "Pick Image from Camera",
-                onTap: () {
-                  //getDocs_Gallery();
-                  //_handleURLButtonPress(context, ImageSourceType.camera);
-                },
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              RoundButton(
-                  title: "Create Project",
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  controller: controller_sampleID,
+                  keyboardType: TextInputType.text,
+                  validator: (value) {
+                    if (value!.isEmpty)
+                      return "Participant / Case ID required";
+                    else
+                      return null;
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Participant / Case ID',
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  readOnly: true,
+                  controller: controller_imgpath,
+                  validator: (value) {
+                    if (value!.isEmpty)
+                      return "Please select image to upload";
+                    else
+                      return null;
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Sample Image',
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: "Pick Image from Gallery",
                   onTap: () {
-                    _gotoCreateProject();
-                  }),
-              const SizedBox(
-                height: 30,
-              ),
-              RoundButton(
-                title: 'Save Data',
-                loading: loading,
-                onTap: () {
-                  setState(() {
-                    loading = true;
-                  });
-
-                  var sampleEntry =
-                      FirebaseFirestore.instance.collection("SampleEntry");
-
-                  if (_formKey.currentState!.validate()) {
-                    sampleEntry.add({
-                      "id": DateTime.now().millisecondsSinceEpoch.toString(),
-                      "projectName": controller_projectID.text,
-                      "sampleID": controller_sampleID.text,
-                      "imgPath": controller_imgpath.text
-                    }).then((value) {
-                      Utils().toastMessage('Sample successfully entered');
-                      setState(() {
-                        loading = false;
-                      });
-                      saveFilePermanently();
-                      _clearField();
-                    }).onError((error, stackTrace) {
-                      Utils().toastMessage(error.toString());
-                      setState(() {
-                        loading = false;
-                      });
+                    getDocs_Gallery();
+                    //_handleURLButtonPress(context, ImageSourceType.gallery);
+                  },
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: "Pick Image from Camera",
+                  onTap: () {
+                    //getDocs_Gallery();
+                    //_handleURLButtonPress(context, ImageSourceType.camera);
+                  },
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                    title: "Create Project",
+                    onTap: () {
+                      _gotoCreateProject();
+                    }),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: 'Save Data',
+                  loading: loading,
+                  onTap: () {
+                    setState(() {
+                      loading = true;
                     });
-                  }
-                },
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              RoundButton(
-                title: "Logout",
-                onTap: () {
-                  _gotologin();
-                },
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-            ],
+
+                    if (_formKey.currentState!.validate()) {
+                      _saveData();
+                    }
+                  },
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: "Logout",
+                  onTap: () {
+                    _gotologin();
+                  },
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+              ],
+            ),
           ),
         ),
       ),
