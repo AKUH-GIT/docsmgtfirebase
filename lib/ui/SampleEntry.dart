@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docsmgtfirebase/ui/Model/ProjectModel.dart';
 import 'package:docsmgtfirebase/ui/ProjectEntry.dart';
+import 'package:docsmgtfirebase/ui/SearchSample.dart';
+import 'package:docsmgtfirebase/ui/ViewFiles.dart';
 import 'package:docsmgtfirebase/ui/auth/LoginScreen.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
@@ -261,6 +263,11 @@ class SampleEntryState extends State<SampleEntry> {
         context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
+  _gotoSearchSample() async {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ViewFiles()));
+  }
+
   _saveData() {
     var sampleEntry = FirebaseFirestore.instance.collection("SampleEntry");
 
@@ -393,6 +400,15 @@ class SampleEntryState extends State<SampleEntry> {
                     if (_formKey.currentState!.validate()) {
                       _saveData();
                     }
+                  },
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                RoundButton(
+                  title: "View Files",
+                  onTap: () {
+                    _gotoSearchSample();
                   },
                 ),
                 const SizedBox(
