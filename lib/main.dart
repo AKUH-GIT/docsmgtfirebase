@@ -14,12 +14,13 @@ Future<void> main() async {
     // Some android/ios specific code
   } else {
     await Firebase.initializeApp(
-        options: FirebaseOptions(
-            apiKey: "AIzaSyBVuYSEthE6kdO5eO3o9wdhX4ZwnBi9vn0",
-            projectId: "docsmgtfirebase",
-            databaseURL: 'https://docsmgtfirebase-default-rtdb.firebaseio.com',
-            messagingSenderId: "852582081126",
-            appId: "1:852582081126:web:ffac5a4dd56280523d83a7"));
+      options: FirebaseOptions(
+          apiKey: "AIzaSyBVuYSEthE6kdO5eO3o9wdhX4ZwnBi9vn0",
+          projectId: "docsmgtfirebase",
+          databaseURL: 'https://docsmgtfirebase-default-rtdb.firebaseio.com',
+          messagingSenderId: "852582081126",
+          appId: "1:852582081126:web:ffac5a4dd56280523d83a7"),
+    );
     // Some web specific code there
   }
 

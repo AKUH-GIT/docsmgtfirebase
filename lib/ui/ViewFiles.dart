@@ -3,6 +3,7 @@ import 'package:docsmgtfirebase/ui/SampleEntry.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:docsmgtfirebase/ui/InnerFolder.dart';
+import 'dart:async';
 
 class ViewFiles extends StatelessWidget {
   // This widget is the root of your application.
@@ -202,6 +203,13 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SampleEntry()));
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.add),
             onPressed: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => SampleEntry()));

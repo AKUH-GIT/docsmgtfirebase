@@ -82,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   hintText: 'Email',
                                   // helperText: 'Enter email for eg reda@aku.edu',
                                   prefixIcon: Icon(Icons.alternate_email)),
+                              style: TextStyle(fontSize: 20),
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return 'Enter Email';
@@ -99,6 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: const InputDecoration(
                                   hintText: 'Password',
                                   prefixIcon: Icon(Icons.lock_open)),
+                              style: TextStyle(fontSize: 20),
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return 'Enter Password';

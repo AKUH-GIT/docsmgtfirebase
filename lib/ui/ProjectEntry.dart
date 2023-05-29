@@ -64,6 +64,7 @@ class ProjectEntryState extends State<ProjectEntry> {
 
   getProjectID() async {
     var collection = FirebaseFirestore.instance.collection('ProjectEntry');
+
     var querySnapshot = await collection.get();
     for (var queryDocumentSnapshot in querySnapshot.docs) {
       Map<String, dynamic> data = queryDocumentSnapshot.data();
@@ -137,6 +138,7 @@ class ProjectEntryState extends State<ProjectEntry> {
                     border: OutlineInputBorder(),
                     labelText: 'Project Name',
                   ),
+                  style: TextStyle(fontSize: 20),
                 ),
                 const SizedBox(
                   height: 30,
@@ -154,22 +156,30 @@ class ProjectEntryState extends State<ProjectEntry> {
                         final projectModels = FirebaseFirestore.instance
                             .collection('ProjectEntry');
 
-                        projectModels.add({
-                          'id':
-                              DateTime.now().millisecondsSinceEpoch.toString(),
-                          'projectName': controller_projectName.text
-                        }).then((value) {
+                        try {
+                          projectModels
+                              .add({
+                                'id': DateTime.now()
+                                    .millisecondsSinceEpoch
+                                    .toString(),
+                                'projectName': controller_projectName.text
+                              })
+                              .then((value) {})
+                              .onError((error, stackTrace) {
+                                Utils().toastMessage(error.toString());
+                                setState(() {
+                                  loading = false;
+                                });
+                              });
+
                           Utils().toastMessage('Project Created');
                           setState(() {
                             loading = false;
                           });
                           _clearField();
-                        }).onError((error, stackTrace) {
-                          Utils().toastMessage(error.toString());
-                          setState(() {
-                            loading = false;
-                          });
-                        });
+                        } catch (e) {
+                          Utils().toastMessage(e.toString());
+                        } finally {}
                       }
                     }
                   },

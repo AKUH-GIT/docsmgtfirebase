@@ -19,12 +19,21 @@ class RoundButton extends StatelessWidget {
         child: Container(
           height: 50,
           decoration: BoxDecoration(
-              color: Colors.deepPurple,
+              color: Colors.purple,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.purple.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 5,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
               borderRadius: BorderRadius.circular(10)),
           child: Center(
             child: loading
                 ? CircularProgressIndicator(strokeWidth: 3, color: Colors.white)
-                : Text(title, style: TextStyle(color: Colors.white)),
+                : Text(title,
+                    style: TextStyle(color: Colors.white, fontSize: 20)),
           ),
         ));
   }

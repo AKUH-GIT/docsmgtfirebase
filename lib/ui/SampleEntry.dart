@@ -271,24 +271,27 @@ class SampleEntryState extends State<SampleEntry> {
   _saveData() {
     var sampleEntry = FirebaseFirestore.instance.collection("SampleEntry");
 
-    sampleEntry.add({
-      "id": DateTime.now().millisecondsSinceEpoch.toString(),
-      "projectName": controller_projectID.text,
-      "sampleID": controller_sampleID.text,
-      "imgPath": controller_imgpath.text
-    }).then((value) {
-      Utils().toastMessage('Sample successfully entered');
-      setState(() {
-        loading = false;
-      });
-      saveFilePermanently();
-      _clearField();
-    }).onError((error, stackTrace) {
-      Utils().toastMessage(error.toString());
-      setState(() {
-        loading = false;
-      });
+    sampleEntry
+        .add({
+          "id": DateTime.now().millisecondsSinceEpoch.toString(),
+          "projectName": controller_projectID.text,
+          "sampleID": controller_sampleID.text,
+          "imgPath": controller_imgpath.text
+        })
+        .then((value) {})
+        .onError((error, stackTrace) {
+          Utils().toastMessage(error.toString());
+          setState(() {
+            loading = false;
+          });
+        });
+
+    Utils().toastMessage('Sample successfully entered');
+    setState(() {
+      loading = false;
     });
+    saveFilePermanently();
+    _clearField();
   }
 
   @override
@@ -340,6 +343,7 @@ class SampleEntryState extends State<SampleEntry> {
                     border: OutlineInputBorder(),
                     labelText: 'Participant / Case ID',
                   ),
+                  style: TextStyle(fontSize: 20),
                 ),
                 const SizedBox(
                   height: 20,
@@ -357,6 +361,7 @@ class SampleEntryState extends State<SampleEntry> {
                     border: OutlineInputBorder(),
                     labelText: 'Sample Image',
                   ),
+                  style: TextStyle(fontSize: 20),
                 ),
                 const SizedBox(
                   height: 30,
