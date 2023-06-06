@@ -138,6 +138,9 @@ class SampleEntryState extends State<SampleEntry> {
           fileToDisplay = File(pickedFile_new!.path.toString());
 
           print("");
+          print("");
+          print("");
+          print("");
 
           var arr = fileToDisplay!.path.split("/");
           var ext = arr[7].split('.');
