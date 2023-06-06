@@ -303,8 +303,6 @@ class SampleEntryState extends State<SampleEntry> {
 
         print("");
         print("");
-        print("");
-        print("");
 
         Directory? appDocDirFolder = Directory(arr[0] +
             "/" +
