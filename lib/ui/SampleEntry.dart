@@ -302,6 +302,8 @@ class SampleEntryState extends State<SampleEntry> {
         var arr = appDocDir!.path.split('/');
 
         print("");
+        print("");
+        print("");
 
         Directory? appDocDirFolder = Directory(arr[0] +
             "/" +
