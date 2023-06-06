@@ -137,6 +137,10 @@ class SampleEntryState extends State<SampleEntry> {
           pickedFile_new = result!.files.first;
           fileToDisplay = File(pickedFile_new!.path.toString());
 
+          print("");
+          print("");
+          print("");
+
           var arr = fileToDisplay!.path.split("/");
           var ext = arr[7].split('.');
 
@@ -300,9 +304,6 @@ class SampleEntryState extends State<SampleEntry> {
           defaultTargetPlatform == TargetPlatform.android) {
         final Directory? appDocDir = await getExternalStorageDirectory();
         var arr = appDocDir!.path.split('/');
-
-        print("");
-        print("");
 
         Directory? appDocDirFolder = Directory(arr[0] +
             "/" +
