@@ -301,10 +301,6 @@ class SampleEntryState extends State<SampleEntry> {
         final Directory? appDocDir = await getExternalStorageDirectory();
         var arr = appDocDir!.path.split('/');
 
-        print("");
-        print("");
-        print("");
-
         Directory? appDocDirFolder = Directory(arr[0] +
             "/" +
             arr[1] +
