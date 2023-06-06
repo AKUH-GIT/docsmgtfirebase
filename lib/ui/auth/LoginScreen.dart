@@ -64,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
             appBar: AppBar(
               title: Text('Login'),
               backgroundColor: Colors.purple,
+              automaticallyImplyLeading: false,
             ),
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),

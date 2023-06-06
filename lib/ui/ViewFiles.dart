@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:docsmgtfirebase/ui/SampleEntry.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:docsmgtfirebase/ui/InnerFolder.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 
 class ViewFiles extends StatelessWidget {
   // This widget is the root of your application.
@@ -26,6 +28,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String message = "";
+
   Future<String> createFolderInAppDocDir(String folderName) async {
     //Get this App Document Directory
 
@@ -40,7 +44,7 @@ class _HomePageState extends State<HomePage> {
     } else {
       //if folder not exists create folder and then return its path
       final Directory _appDocDirNewFolder =
-          await _appDocDirFolder.create(recursive: true);
+      await _appDocDirFolder.create(recursive: true);
       return _appDocDirNewFolder.path;
     }
   }
@@ -53,6 +57,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   final folderController = TextEditingController();
+  late final String url;
   late String nameOfFolder;
 
   /*Future<void> _showMyDialog() async {
@@ -156,6 +161,48 @@ class _HomePageState extends State<HomePage> {
     //print(_folders);
   }
 
+  _uploadFiles1(String filename, String url) async {
+    final directory = await getExternalStorageDirectory();
+    var arr_dir = directory!.path.split('/');
+
+    var appDocDir = new Directory(arr_dir[0] +
+        "/" +
+        arr_dir[1] +
+        "/" +
+        arr_dir[2] +
+        "/" +
+        arr_dir[3] +
+        "/Download/docsmgtsys/");
+
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+
+    Map<String, String> str = {};
+    request.headers.addAll(str);
+
+    /*request.files.add(await http.MultipartFile.fromPath(
+        'imgurl', appDocDir.path + "sero/sero_a78.xlsx"));*/
+
+    var res = await request.send();
+    print("response code = >  " + res.statusCode.toString());
+    return res.reasonPhrase;
+  }
+
+  _uploadFiles(String str1, String str2) async {
+    var url = Uri.parse(
+        'http://cls-pae-fp59408:7777/docsmgtsys/test.php'); // Url of the website where we get the data from.
+    var request = http.Request('POST', url); // Set to GET
+    http.StreamedResponse response = await request.send(); // Send request.
+    // Check if response is okay
+    if (response.statusCode == 200) {
+      dynamic data =
+          await response.stream.bytesToString(); // Turn bytes to readable data.
+      var json = jsonDecode("hello");
+      setState(() => message = json["imgurl"]);
+    } else {
+      print("${response.statusCode} - Something went wrong..");
+    }
+  }
+
   Future<void> _showDeleteDialog(int index) async {
     return showDialog<void>(
       context: context,
@@ -211,8 +258,8 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SampleEntry()));
+              _uploadFiles(
+                  "", "http://cls-pae-fp59408:7777/docsmgtsys/test.php");
             },
           ),
         ],
@@ -258,9 +305,9 @@ class _HomePageState extends State<HomePage> {
                                       Navigator.push(context,
                                           new MaterialPageRoute(
                                               builder: (builder) {
-                                        return InnerFolder(
-                                            filespath: _folders[index].path);
-                                      }));
+                                                return InnerFolder(
+                                                    filespath: _folders[index].path);
+                                              }));
                                       /* final myDir = new Directory(_folders[index].path);
 
                                           var    _folders_list = myDir.listSync(recursive: true, followLinks: false);

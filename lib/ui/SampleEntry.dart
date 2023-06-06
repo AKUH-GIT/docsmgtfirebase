@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:docsmgtfirebase/ui/Model/ProjectModel.dart';
 import 'package:docsmgtfirebase/ui/ProjectEntry.dart';
-import 'package:docsmgtfirebase/ui/SearchSample.dart';
 import 'package:docsmgtfirebase/ui/ViewFiles.dart';
 import 'package:docsmgtfirebase/ui/auth/LoginScreen.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as Path;
@@ -15,6 +15,9 @@ import '../utils/Utils.dart';
 import '../widgets/RoundButton.dart';
 import 'package:flutter/foundation.dart'
     show Uint8List, defaultTargetPlatform, kIsWeb;
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class SampleEntry extends StatefulWidget {
   const SampleEntry({Key? key}) : super(key: key);
@@ -30,6 +33,7 @@ class SampleEntryState extends State<SampleEntry> {
   TextEditingController controller_projectID = new TextEditingController();
   TextEditingController controller_sampleID = new TextEditingController();
   TextEditingController controller_imgpath = new TextEditingController();
+  String var_img = "";
 
   late List<ProjectModel> lst_project = [];
 
@@ -105,7 +109,7 @@ class SampleEntryState extends State<SampleEntry> {
     );
   }
 
-  Future getDocs_Gallery() async {
+  Future getDocs_Gallery_SDCARD() async {
     try {
       if (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android) {
@@ -171,6 +175,110 @@ class SampleEntryState extends State<SampleEntry> {
           Uint8List? fileBytes = result.files.first.bytes;
           fileName = result.files.first.name;
           pickedFile_new = result.files.first;
+          controller_imgpath.text = result.files.first.name;
+
+          //fileToDisplay = File(pickedFile_new!.path.toString());
+
+          //var arr = fileToDisplay!.path.split("/");
+          //var ext = arr[7].split('.');
+        }
+
+        Utils().toastMessage("I m web - ");
+      }
+    } catch (e) {
+      showAlertDialog(context, e.toString());
+      print(e.toString());
+    }
+  }
+
+  /// A new string is uploaded to storage.
+  UploadTask uploadString() {
+    const String putStringText =
+        'This upload has been generated using the putString method! Check the metadata too!';
+
+    // Create a Reference to the file
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('flutter-tests')
+        .child('/put-string-example.txt');
+
+    // Start upload of putString
+    return ref.putString(
+      putStringText,
+      metadata: SettableMetadata(
+        contentLanguage: 'en',
+        customMetadata: <String, String>{'example': 'putString'},
+      ),
+    );
+  }
+
+  Future getDocs_Gallery_Firestore() async {
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android) {
+        result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowMultiple: false,
+            allowedExtensions: [
+              "jpg",
+              "jpeg",
+              "png",
+              "doc",
+              "docx",
+              "xls",
+              "xlsx",
+              "mp4",
+              "mp3",
+              "avi",
+              "pdf",
+              "txt"
+            ]);
+
+        if (result != null) {
+          fileName = result!.files.first.name;
+          pickedFile = result!.files.first;
+          pickedFile_new = result!.files.first;
+          fileToDisplay = File(pickedFile_new!.path.toString());
+
+          var arr = fileToDisplay!.path.split("/");
+          var ext = arr[7].split('.');
+
+          controller_imgpath.text = controller_projectID.text +
+              "_" +
+              controller_sampleID.text +
+              "." +
+              ext[1];
+
+          var dir = await getExternalStorageDirectory();
+          var arr_dir = dir!.path.split('/');
+
+          fileToDisplay_new = File(arr_dir[0] +
+              "/" +
+              arr_dir[1] +
+              "/" +
+              arr_dir[2] +
+              "/" +
+              arr_dir[3] +
+              "/Download/" +
+              controller_projectID.text +
+              "/" +
+              controller_projectID.text +
+              "_" +
+              controller_sampleID.text +
+              "." +
+              ext[1]);
+        } else {
+          // User canceled the picker
+        }
+      } else {
+        FilePickerResult? result = await FilePicker.platform.pickFiles();
+        String fileName = "";
+
+        if (result != null) {
+          Uint8List? fileBytes = result.files.first.bytes;
+          fileName = result.files.first.name;
+          pickedFile_new = result.files.first;
+          controller_imgpath.text = result.files.first.name;
 
           //fileToDisplay = File(pickedFile_new!.path.toString());
 
@@ -188,7 +296,8 @@ class SampleEntryState extends State<SampleEntry> {
 
   Future saveFilePermanently() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.android) {
+      if (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android) {
         final Directory? appDocDir = await getExternalStorageDirectory();
         var arr = appDocDir!.path.split('/');
 
@@ -200,6 +309,8 @@ class SampleEntryState extends State<SampleEntry> {
             "/" +
             arr[3] +
             '/Download/docsmgtsys/${controller_projectID.text}/');
+
+        var_img = Path.basename(appDocDirFolder.path);
 
         var arr1 = pickedFile!.path!.split('/');
         var ext = arr1[7].split('.');
@@ -242,6 +353,42 @@ class SampleEntryState extends State<SampleEntry> {
         if (outputFile == null) {
           // User canceled the picker
         }*/
+      } else {
+        final file = result!.files.first;
+        final filePath = file.path;
+        final mimeType = filePath != null ? lookupMimeType(filePath) : null;
+        final contentType = mimeType != null ? MediaType.parse(mimeType) : null;
+
+        final fileReadStream = file.readStream;
+        if (fileReadStream == null) {
+          throw Exception('Cannot read file from null stream');
+        }
+        final stream = http.ByteStream(fileReadStream);
+
+        final uri = Uri.https('http://CLS-PAE-FP60088/docsmgtsys/test.php',
+            '/flutterwebapp/skyfile');
+        final request = http.MultipartRequest('POST', uri);
+        final multipartFile = http.MultipartFile(
+          'file',
+          stream,
+          file.size,
+          filename: file.name,
+          contentType: contentType,
+        );
+        request.files.add(multipartFile);
+
+        final httpClient = http.Client();
+        final response = await httpClient.send(request);
+
+        if (response.statusCode != 200) {
+          throw Exception('HTTP ${response.statusCode}');
+        }
+
+        final body = await response.stream.transform(utf8.decoder).join();
+
+        print(body);
+
+        Utils().toastMessage("I am web -- save function ");
       }
     } catch (e) {
       showAlertDialog(context, e.toString());
@@ -276,7 +423,8 @@ class SampleEntryState extends State<SampleEntry> {
           "id": DateTime.now().millisecondsSinceEpoch.toString(),
           "projectName": controller_projectID.text,
           "sampleID": controller_sampleID.text,
-          "imgPath": controller_imgpath.text
+          "imgPath": controller_imgpath.text,
+          "img": var_img,
         })
         .then((value) {})
         .onError((error, stackTrace) {
@@ -369,7 +517,7 @@ class SampleEntryState extends State<SampleEntry> {
                 RoundButton(
                   title: "Pick Image from Gallery",
                   onTap: () {
-                    getDocs_Gallery();
+                    getDocs_Gallery_Firestore();
                     //_handleURLButtonPress(context, ImageSourceType.gallery);
                   },
                 ),
