@@ -111,36 +111,13 @@ class SampleEntryState extends State<SampleEntry> {
 
   Future getDocs_Gallery_SDCARD() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.android) {
-        result = await FilePicker.platform.pickFiles(
-            type: FileType.custom,
-            allowMultiple: false,
-            allowedExtensions: [
-              "jpg",
-              "jpeg",
-              "png",
-              "doc",
-              "docx",
-              "xls",
-              "xlsx",
-              "mp4",
-              "mp3",
-              "avi",
-              "pdf",
-              "txt"
-            ]);
+
 
         if (result != null) {
           fileName = result!.files.first.name;
           pickedFile = result!.files.first;
           pickedFile_new = result!.files.first;
           fileToDisplay = File(pickedFile_new!.path.toString());
-
-          print("");
-          print("");
-          print("");
-          print("");
 
           var arr = fileToDisplay!.path.split("/");
           var ext = arr[7].split('.');
@@ -172,21 +149,7 @@ class SampleEntryState extends State<SampleEntry> {
         } else {
           // User canceled the picker
         }
-      } else {
-        FilePickerResult? result = await FilePicker.platform.pickFiles();
-        String fileName = "";
-
-        if (result != null) {
-          Uint8List? fileBytes = result.files.first.bytes;
-          fileName = result.files.first.name;
-          pickedFile_new = result.files.first;
-          controller_imgpath.text = result.files.first.name;
-
-          //fileToDisplay = File(pickedFile_new!.path.toString());
-
-          //var arr = fileToDisplay!.path.split("/");
-          //var ext = arr[7].split('.');
-        }
+    }
 
         Utils().toastMessage("I m web - ");
       }
